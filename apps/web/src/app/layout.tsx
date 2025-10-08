@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Poppins } from "next/font/google";
 import "../index.css";
 import Providers from "@/components/providers";
 import Header from "@/components/common/header";
@@ -15,9 +15,14 @@ const geistMono = Geist_Mono({
 	subsets: ["latin"],
 });
 
+const poppins = Poppins({
+	variable: "--font-poppins",
+	subsets: ["latin"],
+	weight: ["400", "500", "600", "700"],
+});
 export const metadata: Metadata = {
-	title: "tabx",
-	description: "tabx",
+	title: "TabX - Premium Game Store",
+	description: "Discover and download the best games for your devices. Premium game store with curated collections and exclusive titles.",
 };
 
 export default function RootLayout({
@@ -28,10 +33,10 @@ export default function RootLayout({
 	return (
 		<html lang="en" suppressHydrationWarning>
 			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+				className={`${geistSans.variable} ${geistMono.variable} ${poppins.variable} antialiased`}
 			>
 				<Providers>
-					<div className="grid grid-rows-[auto_1fr] h-svh">
+					<div className="min-h-screen">
 						<Header />
 						{children}
 						<Footer />
