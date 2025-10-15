@@ -16,7 +16,7 @@ const HeaderText = ({
   return (
     <h2
       className={`
-      text-xl md:text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent mb-6
+      text-xl md:text-3xl font-bold bg-gradient-to-r from-primary via-secondary to-primary bg-clip-text text-transparent mb-2
       ${textalign} 
       ${className}
     `}
