@@ -1,10 +1,14 @@
 "use client";
 
+import Hero from "@/components/home/hero";
+
 const page = () => {
 	return (
-		<div>
-			<h1>Hello World</h1>
-		</div>
+		<>
+			<section>
+			<Hero />
+			</section>
+		</>
 	);
 };
 
