@@ -83,7 +83,7 @@ const contactInfo = [
 export default function Footer() {
   return (
     <motion.footer
-      className="bg-background border-t"
+      className="glass-nav dark:glass-nav-dark border-t"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: false, margin: "-100px" }}
@@ -225,7 +225,7 @@ export default function Footer() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Button size="sm" className="w-full">
+                <Button size="sm" type="submit" className="w-full text-white cursor-pointer">
                   Subscribe
                 </Button>
               </motion.div>
@@ -293,3 +293,6 @@ export default function Footer() {
     </motion.footer>
   );
 }
+
+
+

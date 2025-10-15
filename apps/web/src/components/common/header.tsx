@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { ModeToggle } from "../mode-toggle";
+import ModeToggle from "../mode-toggle";
 import {
 	NavigationMenu,
 	NavigationMenuContent,
@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Gamepad2, User, ShoppingCart, Search, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import MobileNav from "./mobilenav";
+import MobileNav from "./MobileNav";
 
 // Animated Search Component
 function AnimatedSearch() {
@@ -135,7 +135,7 @@ function AnimatedSearch() {
 									placeholder="Search games... (Press / to focus)"
 									value={searchQuery}
 									onChange={(e) => setSearchQuery(e.target.value)}
-									className="pr-8 h-9 bg-background/95 backdrop-blur border-border/50 focus:border-primary/50"
+									className="pr-8 h-9 glass dark:glass-dark border-border/50 focus:border-primary/50"
 								/>
 								<motion.button
 									type="button"
@@ -156,16 +156,58 @@ function AnimatedSearch() {
 }
 
 export default function Header() {
+	const [isScrolled, setIsScrolled] = useState(false);
+	const [scrollY, setScrollY] = useState(0);
+
+	// Handle scroll effect with progressive blur
+	useEffect(() => {
+		const handleScroll = () => {
+			const scrollTop = window.scrollY;
+			setScrollY(scrollTop);
+			setIsScrolled(scrollTop > 10);
+		};
+
+		window.addEventListener("scroll", handleScroll, { passive: true });
+		return () => window.removeEventListener("scroll", handleScroll);
+	}, []);
+
+	// Calculate blur intensity based on scroll distance
+	const getBlurIntensity = () => {
+		if (scrollY < 10) return "backdrop-blur-none";
+		if (scrollY < 50) return "backdrop-blur-sm";
+		if (scrollY < 100) return "backdrop-blur-md";
+		return "backdrop-blur-lg";
+	};
+
+	// Calculate background opacity based on scroll distance
+	const getBackgroundOpacity = () => {
+		if (scrollY < 10) return "bg-transparent";
+		if (scrollY < 50) return "bg-background/60 dark:bg-background/60";
+		if (scrollY < 100) return "bg-background/80 dark:bg-background/80";
+		return "bg-background/95 dark:bg-background/95";
+	};
+
 	return (
-		<header className="sticky top-0 z-50 w-full border-b bg-[#007dfc]/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+		<header
+			className={`sticky top-0 z-50 w-full border-b glass-nav dark:glass-nav-dark transition-all duration-300 ${isScrolled
+				? `${getBlurIntensity()} ${getBackgroundOpacity()} shadow-lg border-border/50`
+				: "backdrop-blur-none bg-transparent"
+				}`}
+		>
 			<div className="container mx-auto px-4 flex h-16 items-center justify-between">
 				{/* Logo */}
-				<div className="flex items-center space-x-2">
+				<motion.div
+					className="flex items-center space-x-2"
+					animate={{
+						scale: isScrolled ? 0.95 : 1,
+					}}
+					transition={{ duration: 0.3, ease: "easeOut" }}
+				>
 					<Gamepad2 className="h-8 w-8 text-primary" />
 					<Link href="/" className="text-2xl font-bold">
 						TabX
 					</Link>
-				</div>
+				</motion.div>
 
 				{/* Desktop Navigation */}
 				<NavigationMenu className="hidden md:flex">
@@ -173,7 +215,7 @@ export default function Header() {
 
 						<NavigationMenuItem>
 							<NavigationMenuLink asChild>
-								<Link href="/" className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50">
+								<Link href="/" className="group inline-flex h-9 w-max items-center justify-center rounded-md glass dark:glass-dark px-4 py-2 text-sm font-medium transition-all duration-300 hover:scale-105 focus:outline-none disabled:pointer-events-none disabled:opacity-50">
 									Home
 								</Link>
 							</NavigationMenuLink>
@@ -182,7 +224,7 @@ export default function Header() {
 						{/* Bundles */}
 						<NavigationMenuItem>
 							<NavigationMenuLink asChild>
-								<Link href="/bundles" className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50">
+								<Link href="/bundles" className="group inline-flex h-9 w-max items-center justify-center rounded-md glass dark:glass-dark px-4 py-2 text-sm font-medium transition-all duration-300 hover:scale-105 focus:outline-none disabled:pointer-events-none disabled:opacity-50">
 									Bundles
 								</Link>
 							</NavigationMenuLink>
@@ -190,22 +232,31 @@ export default function Header() {
 
 						{/* Products */}
 						<NavigationMenuItem>
-							<NavigationMenuTrigger>Products</NavigationMenuTrigger>
-							<NavigationMenuContent>
+							<NavigationMenuTrigger className="glass dark:glass-dark">Products</NavigationMenuTrigger>
+							<NavigationMenuContent className="glass dark:glass-dark border-border/50">
 								<div className="grid gap-3 p-4 md:w-[300px]">
 									<NavigationMenuLink asChild>
 										<Link href="/products" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-											<div className="text-sm font-medium leading-none">Products</div>
+											<div className="text-sm font-medium leading-none">All Products</div>
+											<p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+												Browse our complete catalog
+											</p>
 										</Link>
 									</NavigationMenuLink>
 									<NavigationMenuLink asChild>
 										<Link href="#" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-											<div className="text-sm font-medium leading-none">Products</div>
+											<div className="text-sm font-medium leading-none">New Releases</div>
+											<p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+												Latest games and updates
+											</p>
 										</Link>
 									</NavigationMenuLink>
 									<NavigationMenuLink asChild>
 										<Link href="#" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
-											<div className="text-sm font-medium leading-none">Products</div>
+											<div className="text-sm font-medium leading-none">Top Rated</div>
+											<p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+												Highest rated games
+											</p>
 										</Link>
 									</NavigationMenuLink>
 								</div>
@@ -213,8 +264,8 @@ export default function Header() {
 						</NavigationMenuItem>
 						{/* Subscriptions */}
 						<NavigationMenuItem>
-							<NavigationMenuTrigger>Subscriptions</NavigationMenuTrigger>
-							<NavigationMenuContent>
+							<NavigationMenuTrigger className="glass dark:glass-dark">Subscriptions</NavigationMenuTrigger>
+							<NavigationMenuContent className="glass dark:glass-dark border-border/50">
 								<div className="grid gap-3 p-4 md:w-[300px]">
 									<NavigationMenuLink asChild>
 										<Link href="/subscriptions" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
@@ -247,7 +298,7 @@ export default function Header() {
 						{/* Gifts */}
 						<NavigationMenuItem>
 							<NavigationMenuLink asChild>
-								<Link href="/gifts" className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50">
+								<Link href="/gifts" className="group inline-flex h-9 w-max items-center justify-center rounded-md glass dark:glass-dark px-4 py-2 text-sm font-medium transition-all duration-300 hover:scale-105 focus:outline-none disabled:pointer-events-none disabled:opacity-50">
 									Gifts
 								</Link>
 							</NavigationMenuLink>
@@ -256,7 +307,7 @@ export default function Header() {
 						{/* Contact */}
 						<NavigationMenuItem>
 							<NavigationMenuLink asChild>
-								<Link href="/contact" className="group inline-flex h-9 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50">
+								<Link href="/contact" className="group inline-flex h-9 w-max items-center justify-center rounded-md glass dark:glass-dark px-4 py-2 text-sm font-medium transition-all duration-300 hover:scale-105 focus:outline-none disabled:pointer-events-none disabled:opacity-50">
 									Contact
 								</Link>
 							</NavigationMenuLink>
@@ -281,7 +332,7 @@ export default function Header() {
 								<User className="h-5 w-5" />
 							</Button>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end" className="w-56">
+						<DropdownMenuContent align="end" className="w-56 glass dark:glass-dark">
 							<DropdownMenuLabel>My Account</DropdownMenuLabel>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem asChild>
