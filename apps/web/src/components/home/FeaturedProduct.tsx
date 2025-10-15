@@ -1,18 +1,25 @@
 "use client";
 
 import React from "react";
+import { motion } from "framer-motion";
+import type { Variants } from "framer-motion";
+import { useInView } from "framer-motion";
+import { useRef } from "react";
 // @ts-ignore - Splide types issue
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/splide/dist/css/splide.min.css";
 import ProductCard from "../common/ProductCard";
+import ProductCardSkeleton from "../common/ProductCardSkeleton";
 import { featuredProducts } from "@/data/products";
 import type { Product } from "@/types/product";
+
 
 interface FeaturedProductProps {
   products?: Product[];
   title?: string;
   className?: string;
   onProductClick?: (product: Product) => void;
+  isLoading?: boolean;
 }
 
 const FeaturedProduct: React.FC<FeaturedProductProps> = ({
@@ -20,7 +27,19 @@ const FeaturedProduct: React.FC<FeaturedProductProps> = ({
   title = "Featured Products",
   className = "",
   onProductClick,
+  isLoading = false,
 }) => {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.3 });
+  const [forceRender, setForceRender] = React.useState(0);
+
+  // Force re-render when loading state changes
+  React.useEffect(() => {
+    if (!isLoading) {
+      setForceRender(prev => prev + 1);
+    }
+  }, [isLoading, products]);
+
   // Splide options for responsive carousel
   const splideOptions = {
     type: "loop",
@@ -62,32 +81,123 @@ const FeaturedProduct: React.FC<FeaturedProductProps> = ({
     },
   };
 
-  return (
-    <div className={`${className} overflow-visible`}>
-      <Splide 
-        options={splideOptions} 
-        className="w-full h-full overflow-visible"
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const slideVariants: Variants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+      },
+    },
+  };
+
+  // Simple conditional rendering approach
+  if (isLoading) {
+    return (
+      <motion.div 
+        key="featured-products-skeleton"
+        ref={ref}
+        className={`${className} overflow-visible`}
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
+        variants={containerVariants}
       >
-        {products.map((product) => (
-          <SplideSlide key={product.id}>
-            <div className="px-1 sm:px-2 overflow-visible">
-              <ProductCard
-                product={product}
-                size="md"
-                showBadge={true}
-                showPrice={true}
-                showBuyButton={true}
-                enableGlow={true}
-                enableParticles={false}
-                animationIntensity="low"
-                onProductClick={onProductClick}
-                className="w-full h-full"
-              />
-            </div>
-          </SplideSlide>
-        ))}
-      </Splide>
-    </div>
+        <motion.div
+          variants={slideVariants}
+          className="w-full h-full overflow-visible"
+        >
+          <Splide 
+            options={splideOptions} 
+            className="w-full h-full overflow-visible"
+          >
+            {Array.from({ length: 4 }).map((_, index) => (
+              <SplideSlide key={`skeleton-${index}`}>
+                <motion.div 
+                  className="px-1 sm:px-2 overflow-visible"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                >
+                  <ProductCardSkeleton
+                    size="md"
+                    showBadge={true}
+                    showPrice={true}
+                    showBuyButton={true}
+                    enableGlow={true}
+                    animationIntensity="low"
+                    className="w-full h-full"
+                  />
+                </motion.div>
+              </SplideSlide>
+            ))}
+          </Splide>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
+  // Render actual products
+  return (
+    <motion.div 
+      key={`featured-products-${forceRender}`}
+      ref={ref}
+      className={`${className} overflow-visible`}
+      initial="hidden"
+      animate={isInView ? "visible" : "hidden"}
+      variants={containerVariants}
+    >
+      <motion.div
+        variants={slideVariants}
+        className="w-full h-full overflow-visible"
+        key={`products-${forceRender}`}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Splide 
+          options={splideOptions} 
+          className="w-full h-full overflow-visible"
+        >
+          {(products && products.length > 0 ? products : featuredProducts).map((product, index) => (
+            <SplideSlide key={product.id}>
+              <motion.div 
+                className="px-1 sm:px-2 overflow-visible"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.8 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+              >
+                <ProductCard
+                  product={product}
+                  size="md"
+                  showBadge={true}
+                  showPrice={true}
+                  showBuyButton={true}
+                  enableGlow={true}
+                  enableParticles={false}
+                  animationIntensity="low"
+                  onProductClick={onProductClick}
+                  className="w-full h-full"
+                />
+              </motion.div>
+            </SplideSlide>
+          ))}
+        </Splide>
+      </motion.div>
+    </motion.div>
   );
 };
 
