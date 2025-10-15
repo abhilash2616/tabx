@@ -9,6 +9,7 @@ import GlowingBackground, {
 import Faq from "@/components/home/Faq";
 import Review from "@/components/home/Review";
 import Subscription from "@/components/home/Subscription";
+import Statics from "@/components/home/Statics";
 
 const page = () => {
   return (
@@ -47,6 +48,9 @@ const page = () => {
       >
         <div className="container mx-auto px-4">
           <HeaderText heading="Our Store in statistics" />
+        </div>
+        <div>
+          <Statics />
         </div>
       </GlowingBackground>
       <GlowingBackground
